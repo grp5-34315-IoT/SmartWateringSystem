@@ -21,7 +21,6 @@ void setup() {
     //wifiMulti.addAP("Nishtman", "Nishtman20");
     //wifiMulti.addAP("Jakobs_iphone", "LarsDrip");
     //wifiMulti.addAP("SRK", "12345678");
-    wifiMulti.addAP("recherche...", "mpsi2areuhere");
 
     Serial.println();
     Serial.print("Connecting ...");
