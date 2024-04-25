@@ -79,7 +79,7 @@ void loop() {
 
 // **** This part reads  sensors and calculates
     float h = dht.readHumidity();
-            // Read temperature as Celsius (the default)
+            // Read humidity
     float t = dht.readTemperature();
             // Read temperature as Fahrenheit (isFahrenheit = true)
     float f = dht.readTemperature(true);
