@@ -6,7 +6,7 @@ const char* password = "pw";
 
 const char* serverName = "http://api.thingspeak.com/update";
 
-String apiKey = "YOUR_CHANNEL_API_KEY";  // Replace it with your ThingSpeak channel API key
+String apiKey = "";  // Replace it with your ThingSpeak channel API key
 
 
 void setup() {

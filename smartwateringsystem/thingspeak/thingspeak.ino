@@ -62,9 +62,16 @@ void setup() {
   Serial.println("WiFi connected");
   
 }
-
+  
 // runs over and over again
 void loop() {
+  
+  setupTempClient(); // Sends data to thingspeak as a client every 20 seconds
+  setupTempServer(); // After having sent data, it now acts as a server for receiving/sending commands
+  delay(postingInterval);
+}
+
+void setupTempClient(){
   ThingSpeak.begin(client);
   if (client.connect(server, 80)) {
     
@@ -77,12 +84,11 @@ void loop() {
 
     ThingSpeak.setField(4,rssi);
 
-// **** This part reads  sensors and calculates
-    float h = dht.readHumidity();
-            // Read humidity
-    float t = dht.readTemperature();
-            // Read temperature as Fahrenheit (isFahrenheit = true)
+ // **** This part reads  sensors and calculates
+    float h = dht.readHumidity(); // Read humidity
+    float t = dht.readTemperature(); // Read temperature as Fahrenheit (isFahrenheit = true)
     float f = dht.readTemperature(true);
+
             // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t) || isnan(f)) {
       Serial.println("Failed to read from DHT sensor!");
@@ -97,29 +103,6 @@ void loop() {
       float hif = dht.computeHeatIndex(f, h);
       dtostrf(hif, 6, 2, fahrenheitTemp);         
       dtostrf(h, 6, 2, humidityTemp);
-
-              Serial.print("Humidity: ");
-              Serial.print(h);
-              Serial.print(" %\t Temperature: ");
-              Serial.print(t);
-              Serial.print(" *C ");
-              Serial.print(f);
-              Serial.print(" *F\t Heat index: ");
-              Serial.print(hic);
-              Serial.print(" *C ");
-              Serial.print(hif);
-              Serial.print(" *F");
-              Serial.print("Humidity: ");
-              Serial.print(h);
-              Serial.print(" %\t Temperature: ");
-              Serial.print(t);
-              Serial.print(" *C ");
-              Serial.print(f);
-              Serial.print(" *F\t Heat index: ");
-              Serial.print(hic);
-              Serial.print(" *C ");
-              Serial.print(hif);
-              Serial.println(" *F");
         //end of sensor readings
       ThingSpeak.setField(1,t);
       ThingSpeak.setField(2,f);
@@ -129,7 +112,36 @@ void loop() {
       ThingSpeak.writeFields(channelID, myWriteAPIKey);
   }
     client.stop();
+}
 
-  // wait and then post again
-  delay(postingInterval);
+void setupTempServer() {
+  if (Serial.available() > 0) {
+    String request = Serial.readStringUntil('\n'); //Read incoming HTTP requests
+    request.trim();  // Remove any whitespace. Maybe remove this code if redundant
+
+    if (request == "POST") {
+      doPostRequest(24.5);  // Example temperature value
+    } else if (request == "GET") {
+      doGetRequest();
+    }
+  }
+}
+
+//Todo: call getHumidity(), getTemperature() etc. depending on the GET request path
+void doGetRequest() {
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        http.begin("http://api.thingspeak.com/channels/YOUR_CHANNEL_ID/feeds.json?api_key=YOUR_READ_API_KEY&results=2");
+        int httpCode = http.GET();
+
+        if (httpCode > 0) {
+            String payload = http.getString();
+            Serial.println(httpCode);
+            Serial.println(payload);
+        } else {
+            Serial.println("Error on HTTP request");
+        }
+
+        http.end();
+    }
 }
