@@ -1,6 +1,7 @@
 
 #include <Arduino_MKRIoTCarrier.h>
 #include <WiFiNINA.h>
+#include <pump.ino>
 MKRIoTCarrier carrier;
 
 char ssid[] = "Zyxel_B151";        // your network SSID (name)
@@ -103,18 +104,36 @@ void handleGetRequest(WiFiClient &client, const String &url) {
 void handlePostRequest(WiFiClient &client, const String &url) {
     // Handle POST requests here
     if (url.startsWith("/pump1")) {
-        //Todo: Call activatePump(1)
+        pump1ON();
         sendHttpResponse(client, 200, "{}");
     }
     if (url.startsWith("/pump2")) {
-        //Todo: Call activatePump(2)
+        pump2ON();
         sendHttpResponse(client, 200, "{}");
     }
     if (url.startsWith("/pump3")) {
-        //Todo: Call activatePump(3)
+        pump3ON();
         sendHttpResponse(client, 200, "{}");
     }
 }
+
+/*
+void handlePostRequestOff(WiFiClient &client, const String &url) {
+    // Handle POST requests here
+    if (url.startsWith("/pump1")) {
+        pump1OFF();
+        sendHttpResponse(client, 200, "{}");
+    }
+    if (url.startsWith("/pump2")) {
+        pump2OFF();
+        sendHttpResponse(client, 200, "{}");
+    }
+    if (url.startsWith("/pump3")) {
+        pump3OFF();
+        sendHttpResponse(client, 200, "{}");
+    }
+}
+*/
 
 void sendHttpResponse(WiFiClient &client, int statusCode, const String &content) {
     client.println("HTTP/1.1 " + String(statusCode) + " " + (statusCode == 200 ? "OK" : "Not Found"));
