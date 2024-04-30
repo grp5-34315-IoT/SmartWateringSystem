@@ -5,7 +5,6 @@ MKRIoTCarrier carrier;
 // Arduino SAMD Boards
 // WiFiNINA
 // Arduino IOT MKR
-MKRIoTCarrier carrier;
 unsigned long previoustime = 0;   // Stores the time when the sensor data was last read
 const long interval = 1 * 60 * 1000;  // Interval between senso 2min
 
@@ -157,26 +156,7 @@ void handlePostRequest(WiFiClient &client, const String &url) {
         pump2ON();
         sendHttpResponse(client, 200, "{}");
     }
-    if (url.startsWith("/pump3")) {
-        pump3ON();
-        sendHttpResponse(client, 200, "{}");
-    }
 }
-
-void pump1ON(){
-carrier.Relay1.on();
-}
-void pump1OFF(){
-carrier.Relay1.off();
-}
-
-void pump2ON(){
-carrier.Relay2.on();
-}
-void pump2OFF(){
-carrier.Relay2.off();
-}
-
 
 /*
 void handlePostRequestOff(WiFiClient &client, const String &url) {
@@ -195,6 +175,20 @@ void handlePostRequestOff(WiFiClient &client, const String &url) {
     }
 }
 */
+
+void pump1ON(){
+carrier.Relay1.open();
+}
+void pump1OFF(){
+carrier.Relay1.close();
+}
+
+void pump2ON(){
+carrier.Relay2.open();
+}
+void pump2OFF(){
+carrier.Relay2.close();
+}
 
 void sendHttpResponse(WiFiClient &client, int statusCode, const String &content) {
     client.println("HTTP/1.1 " + String(statusCode) + " " + (statusCode == 200 ? "OK" : "Not Found"));
