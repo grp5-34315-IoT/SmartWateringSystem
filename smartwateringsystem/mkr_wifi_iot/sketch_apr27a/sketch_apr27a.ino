@@ -1,3 +1,4 @@
+
 #include <Arduino_MKRIoTCarrier.h>
 #include <WiFiNINA.h>
 MKRIoTCarrier carrier;
@@ -17,9 +18,9 @@ int status = WL_IDLE_STATUS;       // the Wifi radio's status
 WiFiServer server(23); // TCP server on port 23 (Typically used for Telnet, change as needed)
 
 void setup() {
+    Serial.begin(9600);
     carrier.noCase();
     carrier.begin();
-    Serial.begin(9600);
     while (!Serial);
 
     // Attempt to connect to Wifi network:
@@ -148,8 +149,6 @@ void handlePostRequest(WiFiClient &client, const String &url) {
     // Handle POST requests here
     if (url.startsWith("/pump1")) {
         pump1ON();
-        delay(2000)
-        pump1Off();
         sendHttpResponse(client, 200, "{}");
     }
     if (url.startsWith("/pump2")) {
