@@ -11,8 +11,8 @@ const long interval = 1 * 60 * 1000;  // Interval between senso 2min
 
 //char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
 // char pass[] = "malloy96";          // your network password (use for WPA, or use as key for WEP)
-char ssid[] = "Nishtman";        // your network SSID (name)
-char pass[] = "Nishtman20";
+char ssid[] = "Daniel - iPhone";        // your network SSID (name)
+char pass[] = "drengene";
 int status = WL_IDLE_STATUS;       // the Wifi radio's status
 
 WiFiServer server(23); // TCP server on port 23 (Typically used for Telnet, change as needed)
@@ -58,6 +58,7 @@ void setup() {
 void loop() {
     WiFiClient client = server.available();
     unsigned long currenttime = millis();
+    char command = Serial.read();
 
     // Check if time to read sensor data and update display
     if (currenttime - previoustime >= interval) {
@@ -81,7 +82,23 @@ void loop() {
         client.stop();
     }
     //Otherwise do the automated watering system functions (implement the rest of your code)
+    /*if(command == 'A'){
+            Serial.println("PUMP1ON");
+            pump1ON();
+    } else if (command == 'a'){
+      Serial.println("PUMP1OFF");
+            pump1OFF();
 
+    }
+        if(command == 'B'){
+            Serial.println("PUMP2ON");
+            pump2ON();
+    } else if (command == 'b'){
+      Serial.println("PUMP2OFF");
+            pump2OFF();
+
+    }
+    */
 }
 
 //this function handles if incoming client requests are POST or GET
