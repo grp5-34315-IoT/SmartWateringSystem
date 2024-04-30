@@ -1,10 +1,18 @@
 
 #include <Arduino_MKRIoTCarrier.h>
 #include <WiFiNINA.h>
-MKRIoTCarrier carrier;
 
-char ssid[] = "Zyxel_B151";        // your network SSID (name)
-char pass[] = "malloy96";          // your network password (use for WPA, or use as key for WEP)
+// Arduino SAMD Boards
+// WiFiNINA
+// Arduino IOT MKR
+MKRIoTCarrier carrier;
+unsigned long previoustime = 0;   // Stores the time when the sensor data was last read
+const long interval = 1 * 60 * 1000;  // Interval between senso 2min
+
+//char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
+// char pass[] = "malloy96";          // your network password (use for WPA, or use as key for WEP)
+char ssid[] = "Nishtman";        // your network SSID (name)
+char pass[] = "Nishtman20";
 int status = WL_IDLE_STATUS;       // the Wifi radio's status
 
 WiFiServer server(23); // TCP server on port 23 (Typically used for Telnet, change as needed)
@@ -29,13 +37,44 @@ void setup() {
     Serial.println(ip);
 
     // Format the IPAddress type to a string so we can display the ip address on the screen
-    String ipStr = String(ip[0]) + "." + String(ip[1]) + "." + String(ip[2]) + "." + String(ip[3]);
+    carrier.display.fillScreen(0xFFFF); // Clear the screen
+    carrier.display.setTextSize(3); // Set text size
+    carrier.display.setTextColor(0x001F); // Set text color
+    carrier.display.setCursor(0, 0); // Set cursor position
+    String ipStr = String(ip[0]) + "." + String(ip[1]) + "." + String(ip[2]) + "." + String(ip[3]) + ":23";
+    displayData(ipStr);
+            // Read humidity
+    float humidity = carrier.Env.readHumidity();
+    String humidityStr = String(humidity);
+    displayData("Humidity: " + humidityStr + "%");
+
+        // Read temperature
+    float temp = carrier.Env.readTemperature();
+    String temperatureStr = String(temp);
+    displayData("Temp: " + temperatureStr + "C");
     //updateDisplay("IP Address:\n", ipStr);
 }
 
 void loop() {
     WiFiClient client = server.available();
+    unsigned long currenttime = millis();
 
+    // Check if time to read sensor data and update display
+    if (currenttime - previoustime >= interval) {
+        // Update the time for the next sensor reading
+        previoustime = currenttime;
+        carrier.display.fillScreen(0xFFFF); // Clear the screen
+        carrier.display.setCursor(0, 0);
+        // Read humidity
+        float humidity = carrier.Env.readHumidity();
+        String humidityStr = String(humidity);
+        displayData("Hum: " + humidityStr + "%");
+
+        // Read temperature
+        float temp = carrier.Env.readTemperature();
+        String temperatureStr = String(temp);
+        displayData("Temp: " + temperatureStr + "C");
+    }
     //If there is an incoming client request, process it
     if (client) {
         processClient(client);
@@ -85,16 +124,22 @@ void processClient(WiFiClient &client) {
 //if we receive a GET request from a client app, then we call the relevant request function and return the relevant data
 void handleGetRequest(WiFiClient &client, const String &url) {
     if (url.startsWith("/humidity")) {
-        float humidity = 65.0; //Todo: Read real humidity
+        //float humidity = 65.0; //Todo: Read real humidity
+        float humidity = carrier.Env.readHumidity();
         sendHttpResponse(client, 200, "{\"humidity\": " + String(humidity) + "}");
+        String humidityStr = String(humidity);
+        displayData("Humidity: " + humidityStr + "%");
     }
     if (url.startsWith("/moisture")) {
         float moisture = 20.1; //Todo: Read real soil moisture
         sendHttpResponse(client, 200, "{\"moisture\": " + String(moisture) + "}");
     }
     if (url.startsWith("/temperature")) {
-        float temp = 20.1; //Todo: Read real soil moisture
+        //float temp = 20.1; //Todo: Read real soil moisture
+        float temp = carrier.Env.readTemperature();
         sendHttpResponse(client, 200, "{\"temp\": " + String(temp) + "}");
+        String temperatureStr = String(temp);
+        displayData("Temp: " + temperatureStr + "°C");
     } else {
         sendHttpResponse(client, 404, "{\"error\": \"Not found\"}");
     }
@@ -122,4 +167,8 @@ void sendHttpResponse(WiFiClient &client, int statusCode, const String &content)
     client.println("Connection: close");
     client.println();
     client.println(content);
+}
+
+void displayData(String data) {
+    carrier.display.println(data);
 }
