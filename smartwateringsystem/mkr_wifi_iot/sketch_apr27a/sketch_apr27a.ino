@@ -1,7 +1,6 @@
 
 #include <Arduino_MKRIoTCarrier.h>
 #include <WiFiNINA.h>
-#include <pump.ino>
 MKRIoTCarrier carrier;
 
 // Arduino SAMD Boards
@@ -162,6 +161,21 @@ void handlePostRequest(WiFiClient &client, const String &url) {
         sendHttpResponse(client, 200, "{}");
     }
 }
+
+void pump1ON(){
+carrier.Relay1.on();
+}
+void pump1OFF(){
+carrier.Relay1.off();
+}
+
+void pump2ON(){
+carrier.Relay2.on();
+}
+void pump2OFF(){
+carrier.Relay2.off();
+}
+
 
 /*
 void handlePostRequestOff(WiFiClient &client, const String &url) {
