@@ -5,11 +5,12 @@
 #include <ArduinoJson.h>
 MKRIoTCarrier carrier;
 // Temporary variables
+const int D0 = 0; 
+const int D1 = 1;
 static char celsiusTemp[7];
 static char fahrenheitTemp[7];
 static char humidityTemp[7];
-pinMode(D0, INPUT);
-pinMode(D1, INPUT);
+
 unsigned long channelID = 2519764; // channel
 const char * myWriteAPIKey = "LLIBJC6Q2HMOE826"; // WRITE API key
 const char* thingSpeakServer = "api.thingspeak.com";
@@ -77,12 +78,12 @@ void setup() {
     //updateDisplay("IP Address:\n", ipStr);
 
     //read the moisture
-    float moisture1 = analogRead(A5);
-    float moisture2 = analogRead(A6);
+    int moisture1 = analogRead(A5);
+    int moisture2 = analogRead(A6);
     String moist1Str = String(moisture1);
     String moist2Str = String(moisture2);
-    displayData("Moist 1: " + moist1Str + "%");
-    displayData("Moist 2: " + moist2Str + "%");
+    displayData("Moist 1: " + moist1Str);
+    displayData("Moist 2: " + moist2Str);
 }
 
 void loop() {
@@ -117,12 +118,18 @@ void readsensor(){
         displayData("Temp: " + temperatureStr + "C");
 
         //read the moisture
-        float moisture1 = analogRead(A5);
-        float moisture2 = analogRead(A6);
+        int moisture1 = analogRead(A5);
+        int moisture2 = analogRead(A6);
         String moist1Str = String(moisture1);
         String moist2Str = String(moisture2);
-        displayData("Moist 1: " + moist1Str + "%");
-        displayData("Moist 2: " + moist2Str + "%");
+        displayData("Moist 1: " + moist1Str);
+        displayData("Moist 2: " + moist2Str);
+        if (moisture1<500){
+        pump1ON();
+        }
+        if (moisture2<500){
+          pump2ON();
+        }
     }
 }
 
