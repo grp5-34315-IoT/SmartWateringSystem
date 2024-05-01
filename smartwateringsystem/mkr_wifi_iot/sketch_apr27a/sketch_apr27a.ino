@@ -26,12 +26,11 @@ WiFiClient thingSpeakClient;
 unsigned long previoustime = 0;   // Stores the time when the sensor data was last read
 const long interval = 5 * 60 * 1000;  // Interval between senso 2min
 
-/*
-char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
-char pass[] = "malloy96";
-*/
-char ssid[] = "recherche...";        // your network SSID (name)
-char pass[] = "mpsi2areuhere";          // your network password (use for WPA, or use as key for WEP)
+
+//char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
+//char pass[] = "malloy96";
+char ssid[] = "Nishtman";        // your network SSID (name)
+char pass[] = "Nishtman20";
 int status = WL_IDLE_STATUS;       // the Wifi radio's status
 
 WiFiServer server(23); // TCP server on port 23 (Typically used for Telnet, change as needed)
@@ -97,6 +96,7 @@ void loop() {
         processClient(client);
         client.stop();
     }
+  
 }
 
 void readsensor(){
@@ -180,52 +180,56 @@ void processClient(WiFiClient &client) {
 
 //if we receive a GET request from a client app, then we call the relevant request function and return the relevant data
 void handleGetRequest(WiFiClient &client, const String &url) {
-    if (url.startsWith("/humidity")) {
-        //float humidity = 65.0; //Todo: Read real humidity
-        float humidity = carrier.Env.readHumidity();
-        sendHttpResponse(client, 200, "{\"humidity\": " + String(humidity) + "}");
-        String humidityStr = String(humidity);
-        displayData("Humidity: " + humidityStr + "%");
-    }
-    if (url.startsWith("/moisture")) {
-        float moisture = 20.1; //Todo: Read real soil moisture
-        sendHttpResponse(client, 200, "{\"moisture\": " + String(moisture) + "}");
-    }
-    if (url.startsWith("/temperature")) {
-        //float temp = 20.1; //Todo: Read real soil moisture
-        float temp = carrier.Env.readTemperature();
-        sendHttpResponse(client, 200, "{\"temp\": " + String(temp) + "}");
-        String temperatureStr = String(temp);
-        displayData("Temp: " + temperatureStr + "°C");
-    } else {
-        sendHttpResponse(client, 404, "{\"error\": \"Not found\"}");
-    }
+  if (url.startsWith("/humidity")) {
+    //float humidity = 65.0; //Todo: Read real humidity
+    float humidity = carrier.Env.readHumidity();
+    sendHttpResponse(client, 200, "{\"humidity\": " + String(humidity) + "}");
+    String humidityStr = String(humidity);
+    displayData("Humidity: " + humidityStr + "%");
+  }
+  if (url.startsWith("/moisture")) {
+    float moisture = 20.1;  //Todo: Read real soil moisture
+    sendHttpResponse(client, 200, "{\"moisture\": " + String(moisture) + "}");
+  }
+  if (url.startsWith("/temperature")) {
+    //float temp = 20.1; //Todo: Read real soil moisture
+    float temp = carrier.Env.readTemperature();
+    sendHttpResponse(client, 200, "{\"temp\": " + String(temp) + "}");
+    String temperatureStr = String(temp);
+    displayData("Temp: " + temperatureStr + "°C");
+  } else {
+    sendHttpResponse(client, 404, "{\"error\": \"Not found\"}");
+  }
 }
 
 void handlePostRequest(WiFiClient &client, const String &url) {
-    // Handle POST requests here
-    if (url.startsWith("/pump1")) {
-        pump1ON();
-        sendHttpResponse(client, 200, "{}");
-    }
-    if (url.startsWith("/pump2")) {
-        pump2ON();
-        sendHttpResponse(client, 200, "{}");
-    }
+  // Handle POST requests here
+  if (url.startsWith("/pump1")) {
+    pump1ON();
+    sendHttpResponse(client, 200, "{}");
+  }
+  if (url.startsWith("/pump2")) {
+    pump2ON();
+    sendHttpResponse(client, 200, "{}");
+  }
 }
 
-void pump1ON(){
-    carrier.Relay1.open();
+void pump1ON() {
+  carrier.Relay1.open();
+  delay(2000);
+  pump1OFF();
 }
-void pump1OFF(){
-    carrier.Relay1.close();
+void pump1OFF() {
+  carrier.Relay1.close();
 }
 
-void pump2ON(){
-    carrier.Relay2.open();
+void pump2ON() {
+  carrier.Relay2.open();
+  delay(2000);
+  pump2OFF();
 }
-void pump2OFF(){
-    carrier.Relay2.close();
+void pump2OFF() {
+  carrier.Relay2.close();
 }
 
 void sendHttpResponse(WiFiClient &client, int statusCode, const String &content) {
@@ -273,7 +277,7 @@ void thingspeak(){
   }
     thingSpeakClient.stop();
  // wait and then post again
-  delay(postingInterval);
+  //delay(postingInterval);
 }
 
 
