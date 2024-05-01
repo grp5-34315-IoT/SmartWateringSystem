@@ -8,6 +8,8 @@ MKRIoTCarrier carrier;
 static char celsiusTemp[7];
 static char fahrenheitTemp[7];
 static char humidityTemp[7];
+pinMode(D0, INPUT);
+pinMode(D1, INPUT);
 unsigned long channelID = 2519764; // channel
 const char * myWriteAPIKey = "LLIBJC6Q2HMOE826"; // WRITE API key
 const char* thingSpeakServer = "api.thingspeak.com";
@@ -37,6 +39,8 @@ void setup() {
     Serial.begin(9600);
     carrier.noCase();
     carrier.begin();
+    pinMode(A5, INPUT);
+    pinMode(A6, INPUT);
     while (!Serial);
 
     // Attempt to connect to Wifi network:
@@ -71,6 +75,14 @@ void setup() {
     String temperatureStr = String(temp);
     displayData("Temp: " + temperatureStr + "C");
     //updateDisplay("IP Address:\n", ipStr);
+
+    //read the moisture
+    float moisture1 = analogRead(A5);
+    float moisture2 = analogRead(A6);
+    String moist1Str = String(moisture1);
+    String moist2Str = String(moisture2);
+    displayData("Moist 1: " + moist1Str + "%");
+    displayData("Moist 2: " + moist2Str + "%");
 }
 
 void loop() {
@@ -103,9 +115,16 @@ void readsensor(){
         float temp = carrier.Env.readTemperature();
         String temperatureStr = String(temp);
         displayData("Temp: " + temperatureStr + "C");
+
+        //read the moisture
+        float moisture1 = analogRead(A5);
+        float moisture2 = analogRead(A6);
+        String moist1Str = String(moisture1);
+        String moist2Str = String(moisture2);
+        displayData("Moist 1: " + moist1Str + "%");
+        displayData("Moist 2: " + moist2Str + "%");
     }
 }
-
 
 void displayData(String data) {
     carrier.display.println(data);
@@ -214,6 +233,10 @@ void thingspeak(){
     float h = carrier.Env.readHumidity();
             // Read humidity
     float t = carrier.Env.readTemperature();
+
+    float m1 = analogRead(A5);
+
+    float m2 = analogRead(A6);
             // Read temperature
     //float f = dht.readTemperature(true);
             // Check if any reads failed and exit early (to try again).
@@ -227,6 +250,9 @@ void thingspeak(){
       ThingSpeak.setField(1,t);
       //ThingSpeak.setField(2,f);
       ThingSpeak.setField(2,h);
+
+      ThingSpeak.setField(3,m1);
+      ThingSpeak.setField(4,m2);
       }
 
       ThingSpeak.writeFields(channelID, myWriteAPIKey);
@@ -235,3 +261,5 @@ void thingspeak(){
  // wait and then post again
   delay(postingInterval);
 }
+
+
