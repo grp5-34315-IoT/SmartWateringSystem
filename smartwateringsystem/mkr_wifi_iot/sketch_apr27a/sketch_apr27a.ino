@@ -5,8 +5,8 @@
 #include <ArduinoJson.h>
 MKRIoTCarrier carrier;
 // Temporary variables
-const int D0 = 0; 
-const int D1 = 1;
+//const int  = 0; 
+//const int D1 = 1;
 static char celsiusTemp[7];
 static char fahrenheitTemp[7];
 static char humidityTemp[7];
@@ -24,7 +24,7 @@ const int postingInterval = 20 * 1000; // post data every 20 seconds
 // Arduino IOT MKR
 WiFiClient thingSpeakClient;
 unsigned long previoustime = 0;   // Stores the time when the sensor data was last read
-const long interval = 1 * 60 * 1000;  // Interval between senso 2min
+const long interval = 5 * 60 * 1000;  // Interval between senso 2min
 
 /*
 char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
@@ -80,10 +80,12 @@ void setup() {
     //read the moisture
     int moisture1 = analogRead(A5);
     int moisture2 = analogRead(A6);
-    String moist1Str = String(moisture1);
-    String moist2Str = String(moisture2);
-    displayData("Moist 1: " + moist1Str);
-    displayData("Moist 2: " + moist2Str);
+    int map_moisture1 = map(moisture1, 0, 1023, 100, 0);
+    int map_moisture2 = map(moisture2, 0, 1023, 100, 0);
+    String moist1Str = String(map_moisture1);
+    String moist2Str = String(map_moisture2);
+    displayData("Moist 1: " + moist1Str + "%");
+    displayData("Moist 2: " + moist2Str + "%");
 }
 
 void loop() {
@@ -120,14 +122,16 @@ void readsensor(){
         //read the moisture
         int moisture1 = analogRead(A5);
         int moisture2 = analogRead(A6);
-        String moist1Str = String(moisture1);
-        String moist2Str = String(moisture2);
-        displayData("Moist 1: " + moist1Str);
-        displayData("Moist 2: " + moist2Str);
-        if (moisture1<500){
-        pump1ON();
+        int map_moisture1 = map(moisture1, 0, 1023, 100, 0);
+        int map_moisture2 = map(moisture2, 0, 1023, 100, 0);
+        String moist1Str = String(map_moisture1);
+        String moist2Str = String(map_moisture2);
+        displayData("Moist 1: " + moist1Str + "%");
+        displayData("Moist 2: " + moist2Str + "%");
+        if (map_moisture1<34){
+          pump1ON();
         }
-        if (moisture2<500){
+        if (map_moisture2<34){
           pump2ON();
         }
     }
@@ -244,6 +248,9 @@ void thingspeak(){
     float m1 = analogRead(A5);
 
     float m2 = analogRead(A6);
+
+    //float map_moisture1 = 100 * max(0.0f, min(1.0f, static_cast<float>(moisture1 - 880) / (1023 - 880)));
+    //float map_moisture2 = 100 * max(0.0f, min(1.0f, static_cast<float>(moisture2 - 880) / (1023 - 880)));
             // Read temperature
     //float f = dht.readTemperature(true);
             // Check if any reads failed and exit early (to try again).
