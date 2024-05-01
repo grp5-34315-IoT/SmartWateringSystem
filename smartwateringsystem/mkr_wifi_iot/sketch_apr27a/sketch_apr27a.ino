@@ -1,13 +1,27 @@
 
 #include <Arduino_MKRIoTCarrier.h>
 #include <WiFiNINA.h>
+#include <ThingSpeak.h>
+#include <WiFiClient.h>
+#include <ArduinoJson.h>
 MKRIoTCarrier carrier;
+// Temporary variables
+static char celsiusTemp[7];
+static char fahrenheitTemp[7];
+static char humidityTemp[7];
+unsigned long channelID = 2519764; // channel
+const char * myWriteAPIKey = "LLIBJC6Q2HMOE826"; // WRITE API key
+const char* server = "api.thingspeak.com";
+
+const int postingInterval = 20 * 1000; // post data every 20 seconds
+
+    
 
 // Arduino SAMD Boards
 // WiFiNINA
 // Arduino IOT MKR
 unsigned long previoustime = 0;   // Stores the time when the sensor data was last read
-const long interval = 1 * 60 * 1000;  // Interval between senso 2min
+const long interval = 5 * 60 * 1000;  // Interval between senso 2min
 
 //char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
 // char pass[] = "malloy96";          // your network password (use for WPA, or use as key for WEP)
@@ -43,6 +57,8 @@ void setup() {
     carrier.display.setCursor(0, 0); // Set cursor position
     String ipStr = String(ip[0]) + "." + String(ip[1]) + "." + String(ip[2]) + "." + String(ip[3]) + ":23";
     displayData(ipStr);
+  
+
             // Read humidity
     float humidity = carrier.Env.readHumidity();
     String humidityStr = String(humidity);
@@ -57,25 +73,8 @@ void setup() {
 
 void loop() {
     WiFiClient client = server.available();
-    unsigned long currenttime = millis();
-    char command = Serial.read();
-
-    // Check if time to read sensor data and update display
-    if (currenttime - previoustime >= interval) {
-        // Update the time for the next sensor reading
-        previoustime = currenttime;
-        carrier.display.fillScreen(0xFFFF); // Clear the screen
-        carrier.display.setCursor(0, 0);
-        // Read humidity
-        float humidity = carrier.Env.readHumidity();
-        String humidityStr = String(humidity);
-        displayData("Hum: " + humidityStr + "%");
-
-        // Read temperature
-        float temp = carrier.Env.readTemperature();
-        String temperatureStr = String(temp);
-        displayData("Temp: " + temperatureStr + "C");
-    }
+    readsensor();
+    thingspeak();
     //If there is an incoming client request, process it
     if (client) {
         processClient(client);
@@ -100,6 +99,88 @@ void loop() {
     }
     */
 }
+
+void readsensor(){
+    unsigned long currenttime = millis();
+    char command = Serial.read();
+
+    // Check if time to read sensor data and update display
+    if (currenttime - previoustime >= interval) {
+        // Update the time for the next sensor reading
+        previoustime = currenttime;
+        carrier.display.fillScreen(0xFFFF); // Clear the screen
+        carrier.display.setCursor(0, 0);
+        // Read humidity
+        float humidity = carrier.Env.readHumidity();
+        String humidityStr = String(humidity);
+        displayData("Hum: " + humidityStr + "%");
+
+        // Read temperature
+        float temp = carrier.Env.readTemperature();
+        String temperatureStr = String(temp);
+        displayData("Temp: " + temperatureStr + "C");
+    }
+}
+
+void thingspeak(){
+  ThingSpeak.begin(client);
+  if (client.connect(server, 80)) {
+
+// **** This part reads  sensors and calculates
+    float h = carrier.Env.readHumidity();
+            // Read humidity
+    float t = carrier.Env.readTemperature();
+            // Read temperature 
+    //float f = dht.readTemperature(true);
+            // Check if any reads failed and exit early (to try again).
+    if (isnan(h) || isnan(t)) {
+      Serial.println("Failed to read from DHT sensor!");
+      strcpy(celsiusTemp,"Failed");
+      strcpy(humidityTemp, "Failed");         
+      }
+    else{
+              // Computes temperature values in Celsius + Fahrenheit and Humidity
+      float hic = dht.computeHeatIndex(t, h, false);       
+      dtostrf(hic, 6, 2, celsiusTemp);                    
+      dtostrf(h, 6, 2, humidityTemp);
+
+              Serial.print("Humidity: ");
+              Serial.print(h);
+              Serial.print(" %\t Temperature: ");
+              Serial.print(t);
+              Serial.print(" *C ");
+              Serial.print(f);
+              Serial.print(" *F\t Heat index: ");
+              Serial.print(hic);
+              Serial.print(" *C ");
+              Serial.print(hif);
+              Serial.print(" *F");
+              Serial.print("Humidity: ");
+              Serial.print(h);
+              Serial.print(" %\t Temperature: ");
+              Serial.print(t);
+              Serial.print(" *C ");
+              Serial.print(f);
+              Serial.print(" *F\t Heat index: ");
+              Serial.print(hic);
+              Serial.print(" *C ");
+              Serial.print(hif);
+              Serial.println(" *F");
+        //end of sensor readings
+      ThingSpeak.setField(1,t);
+      //ThingSpeak.setField(2,f);
+      ThingSpeak.setField(2,h);
+      }
+            
+      ThingSpeak.writeFields(channelID, myWriteAPIKey);
+  }
+    client.stop();
+}
+  // wait and then post again
+  delay(postingInterval);
+}
+
+
 
 //this function handles if incoming client requests are POST or GET
 void processClient(WiFiClient &client) {

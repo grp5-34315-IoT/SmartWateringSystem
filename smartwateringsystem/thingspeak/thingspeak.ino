@@ -125,6 +125,7 @@ void setupTempServer() {
       doGetRequest();
     }
   }
+  delay(postingInterval);
 }
 
 //Todo: call getHumidity(), getTemperature() etc. depending on the GET request path
