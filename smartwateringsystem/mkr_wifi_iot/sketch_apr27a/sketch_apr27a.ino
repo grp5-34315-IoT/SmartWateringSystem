@@ -88,6 +88,8 @@ void setup() {
 }
 
 void loop() {
+    pump1OFF();
+    pump2OFF();
     WiFiClient client = server.available();
     readsensor();
     thingspeak();
@@ -215,21 +217,21 @@ void handlePostRequest(WiFiClient &client, const String &url) {
 }
 
 void pump1ON() {
-  carrier.Relay1.open();
+  carrier.Relay1.close();
   delay(2000);
   pump1OFF();
 }
 void pump1OFF() {
-  carrier.Relay1.close();
+  carrier.Relay1.open();
 }
 
 void pump2ON() {
-  carrier.Relay2.open();
+  carrier.Relay2.close();
   delay(2000);
   pump2OFF();
 }
 void pump2OFF() {
-  carrier.Relay2.close();
+  carrier.Relay2.open();
 }
 
 void sendHttpResponse(WiFiClient &client, int statusCode, const String &content) {
