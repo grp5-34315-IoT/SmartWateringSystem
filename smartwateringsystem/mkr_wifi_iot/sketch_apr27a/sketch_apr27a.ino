@@ -24,13 +24,15 @@ const int postingInterval = 20 * 1000; // post data every 20 seconds
 // Arduino IOT MKR
 WiFiClient thingSpeakClient;
 unsigned long previoustime = 0;   // Stores the time when the sensor data was last read
-const long interval = 5 * 60 * 1000;  // Interval between senso 2min
+const long interval = 20000//5 * 60 * 1000;  // Interval between senso 2min
 
 
 //char ssid[] = "iPhone 13 Pro";        // your network SSID (name)
 //char pass[] = "malloy96";
-char ssid[] = "Nishtman";        // your network SSID (name)
-char pass[] = "Nishtman20";
+//char ssid[] = "Nishtman";        // your network SSID (name)
+//char pass[] = "Nishtman20";
+char ssid[] = "SRK";        // your network SSID (name)
+char pass[] = "12345678";
 int status = WL_IDLE_STATUS;       // the Wifi radio's status
 
 WiFiServer server(23); // TCP server on port 23 (Typically used for Telnet, change as needed)
@@ -251,9 +253,11 @@ void thingspeak(){
             // Read humidity
     float t = carrier.Env.readTemperature();
 
-    float m1 = analogRead(A5);
+    int moisture1 = analogRead(A5);
 
-    float m2 = analogRead(A6);
+    int moisture2 = analogRead(A6);
+    float m1 = map(moisture1, 0, 1023, 100, 0);
+    float m2 = map(moisture2, 0, 1023, 100, 0);
 
     //float map_moisture1 = 100 * max(0.0f, min(1.0f, static_cast<float>(moisture1 - 880) / (1023 - 880)));
     //float map_moisture2 = 100 * max(0.0f, min(1.0f, static_cast<float>(moisture2 - 880) / (1023 - 880)));
